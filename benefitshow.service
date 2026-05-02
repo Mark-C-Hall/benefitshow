@@ -1,0 +1,15 @@
+[Unit]
+Description=Benefit Show Voting App
+After=network.target
+
+[Service]
+Type=simple
+User=nobody
+Group=nogroup
+WorkingDirectory=/opt/benefitshow
+ExecStart=/opt/benefitshow/benefitshow serve
+Restart=on-failure
+EnvironmentFile=/etc/benefitshow.env
+
+[Install]
+WantedBy=multi-user.target
