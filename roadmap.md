@@ -16,17 +16,18 @@ The following is already in place and is **not** repeated in the milestones belo
 
 Goal: prove the deploy path works end-to-end before writing any real app code, so every later milestone is just `make deploy`.
 
-- [ ] `go mod init`
-- [ ] Create `cmd/`, `internal/`, `web/templates/`, `web/static/` directories
-- [ ] `cmd/benefitshow/main.go`: minimal HTTP server bound to `:$PORT` that returns `200 ok`
-- [ ] Add `Makefile` (`build`, `run`, `lint`, `clean`, `deploy`, `build-linux`)
-- [ ] Add `.gitignore` (binary, `*.db`, `.env`)
-- [ ] Commit `README.md`, `spec.md`, `roadmap.md`, `LICENSE` and push to GitHub
-- [ ] Write `benefitshow.service` (systemd unit) and copy to `/etc/systemd/system/` on the VM
-- [ ] Create `/opt/benefitshow` with the right ownership for the `make deploy` rsync target
-- [ ] Create `/etc/benefitshow.env` (empty placeholders for now); `chmod 600`
-- [ ] `systemctl enable --now benefitshow`
-- [ ] **Deploy:** `make deploy` — VM now serves `200 ok`. `https://bandvote.app` returns `ok` instead of 503.
+- [x] `go mod init`
+- [x] Create `cmd/`, `internal/`, `web/templates/`, `web/static/` directories
+- [x] `internal/config`: env loading; M0 only needs `PORT` (default `8080`). Later milestones extend it with the Discord and DB vars from spec §11
+- [x] `cmd/benefitshow/main.go`: minimal HTTP server bound to `:$PORT` that returns `200 ok`
+- [x] Add `Makefile` (`build`, `run`, `lint`, `clean`, `deploy`, `build-linux`)
+- [x] Add `.gitignore` (binary, `*.db`, `.env`)
+- [x] Commit `README.md`, `spec.md`, `roadmap.md`, `LICENSE` and push to GitHub
+- [x] Write `benefitshow.service` (systemd unit) and copy to `/etc/systemd/system/` on the VM
+- [x] Create `/opt/benefitshow` with the right ownership for the `make deploy` upload target
+- [x] Create `/etc/benefitshow.env` (empty placeholders for now); `chmod 600`
+- [x] `systemctl enable --now benefitshow`
+- [x] **Deploy:** `make deploy` — VM now serves `200 ok`. `https://bandvote.app` returns `ok` instead of 503.
 
 **Done when:** the VM is serving the placeholder binary over HTTPS at `bandvote.app`, and `make deploy` is a one-command path to ship a new build.
 

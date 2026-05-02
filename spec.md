@@ -177,7 +177,7 @@ Ties (equal vote counts at elimination time) are broken deterministically by son
 
 ## 11. Configuration
 
-All configuration is read from environment variables on startup:
+Configuration is read from environment variables on startup by the `internal/config` package, which validates required variables and exposes a typed struct used by the rest of the app:
 
 | Variable                | Required | Purpose                                     |
 | ----------------------- | -------- | ------------------------------------------- |
@@ -197,6 +197,7 @@ The binary refuses to start the `serve` subcommand if any required variable is m
 benefitshow/
 ├── cmd/benefitshow/main.go   entrypoint, CLI subcommand dispatch
 ├── internal/
+│   ├── config/               env var loading and validation
 │   ├── server/               HTTP handlers, router, middleware
 │   ├── auth/                 Discord OAuth, session helpers
 │   ├── ballot/               ballot read/write, CSV import

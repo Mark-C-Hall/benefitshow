@@ -26,7 +26,7 @@ Pre-alpha. Active build target: weekend of 2026-05-03. See [roadmap.md](roadmap.
 ```sh
 make run                      # build and start the server on :8080
 make build                    # build the binary
-make lint                     # go vet
+make lint                     # go vet + gofmt check
 ./benefitshow import b.csv    # import paper ballots
 ./benefitshow tally           # run STV, print top 10
 ```
