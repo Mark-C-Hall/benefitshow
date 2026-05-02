@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Mark-C-Hall/benefitshow/internal/ballot"
 	"github.com/Mark-C-Hall/benefitshow/internal/config"
 	"github.com/Mark-C-Hall/benefitshow/web"
 )
@@ -18,14 +19,22 @@ import (
 type Server struct {
 	cfg       *config.Config
 	templates map[string]*template.Template
+	store     *ballot.Store
+	devUserID int64
 }
 
-func New(cfg *config.Config) (http.Handler, error) {
+func New(cfg *config.Config, store *ballot.Store) (http.Handler, error) {
 	templates, err := parseTemplates()
 	if err != nil {
 		return nil, fmt.Errorf("parsing templates: %w", err)
 	}
-	s := &Server{cfg: cfg, templates: templates}
+
+	devUserID, err := store.EnsureUser("dev-stub", "dev")
+	if err != nil {
+		return nil, fmt.Errorf("bootstrapping dev user: %w", err)
+	}
+
+	s := &Server{cfg: cfg, templates: templates, store: store, devUserID: devUserID}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.handleLanding)

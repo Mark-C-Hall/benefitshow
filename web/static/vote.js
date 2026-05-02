@@ -106,19 +106,24 @@
 
   submitBtn.addEventListener('click', async () => {
     if (ranks.includes(null)) return;
-    const payload = { ranks };
-    console.log('submitting ballot', payload);
+    submitBtn.disabled = true;
     try {
       const res = await fetch('/vote', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ranks }),
       });
-      console.log('server response', res.status);
-      alert('submitted (M1 stub — not persisted)');
+      if (res.ok) {
+        window.location.href = '/vote';
+        return;
+      }
+      const msg = await res.text();
+      alert('Could not submit: ' + msg);
+      window.location.href = '/vote';
     } catch (err) {
       console.error('submit failed', err);
-      alert('submit failed: ' + err.message);
+      alert('Submit failed: ' + err.message);
+      submitBtn.disabled = false;
     }
   });
 

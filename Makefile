@@ -8,7 +8,7 @@ REMOTE_DIR  := /opt/benefitshow
 
 GCLOUD_FLAGS := --zone=$(GCP_ZONE) --project=$(GCP_PROJECT)
 
-.PHONY: build run lint clean build-linux deploy
+.PHONY: build run lint clean build-linux deploy reset-db
 
 build:
 	go build -o $(BINARY) $(PKG)
@@ -22,6 +22,9 @@ lint:
 
 clean:
 	rm -f $(BINARY) $(BINARY)-linux
+
+reset-db:
+	rm -f benefitshow.db benefitshow.db-shm benefitshow.db-wal
 
 build-linux:
 	GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build -o $(BINARY)-linux $(PKG)

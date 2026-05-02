@@ -142,7 +142,7 @@ Interaction model is **click-to-select**, not HTML5 drag-and-drop (drag-and-drop
 - Click a song in the right column → it returns to the left pool.
 - Up/down arrows on each right-column entry to reorder.
 - Submit is disabled until exactly 5 songs are selected.
-- On submit, POST `application/json` to `/vote` with `{"ranks": [<id>, <id>, <id>, <id>, <id>]}`. The server responds with a redirect to the locked view.
+- On submit, POST `application/json` to `/vote` with `{"ranks": [<id>, <id>, <id>, <id>, <id>]}`. On success the server returns `204 No Content` and the client navigates to `/vote`, which renders the locked view. On `409 Conflict` (already voted) the client also navigates to `/vote` to surface the locked view; other 4xx responses are shown to the user as an error.
 
 Each song row renders its ID, title, artist, and small icon links to its YouTube and Spotify pages. URLs are part of the hardcoded song data.
 
@@ -223,9 +223,10 @@ The service runs on a small VM (e.g. GCP `e2-micro`) behind Caddy, which auto-pr
 1. Provision the VM and open ports 80 and 443.
 2. Point a domain at the VM's external IP via an A record.
 3. Install Caddy and configure a single site directive that reverse-proxies to `localhost:8080`.
-4. Create `/opt/benefitshow`, install `benefitshow.service` into `/etc/systemd/system/`, and `systemctl enable` it.
-5. Register the OAuth app on the Discord developer portal, copy client ID/secret, and add the production callback URL.
-6. Set environment variables in the systemd unit (or a referenced `EnvironmentFile`).
+4. Create `/opt/benefitshow` (owned by the deploy user) for the binary, and `/var/lib/benefitshow` (owned by the service user, mode `0750`) for the SQLite database. Splitting code from state lets the service run as an unprivileged `nobody:nogroup` user without making the deploy target world-writable.
+5. Install `benefitshow.service` into `/etc/systemd/system/` and `systemctl enable` it.
+6. Register the OAuth app on the Discord developer portal, copy client ID/secret, and add the production callback URL.
+7. Populate `/etc/benefitshow.env` with `DB_PATH=/var/lib/benefitshow/benefitshow.db` plus the Discord and session variables. `chmod 600`.
 
 ### Repeatable deploys
 

@@ -22,9 +22,19 @@ type Song struct {
 var raw []byte
 
 var All []Song
+var byID map[int]*Song
 
 func init() {
 	if err := json.Unmarshal(raw, &All); err != nil {
 		panic(fmt.Errorf("songs: parsing embedded songs.json: %w", err))
 	}
+	byID = make(map[int]*Song, len(All))
+	for i := range All {
+		byID[All[i].ID] = &All[i]
+	}
+}
+
+// ByID returns the Song with the given ID, or nil if not found.
+func ByID(id int) *Song {
+	return byID[id]
 }

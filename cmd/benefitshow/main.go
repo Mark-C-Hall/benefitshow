@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/Mark-C-Hall/benefitshow/internal/ballot"
 	"github.com/Mark-C-Hall/benefitshow/internal/config"
 	"github.com/Mark-C-Hall/benefitshow/internal/server"
 )
@@ -45,7 +46,13 @@ func runServe() {
 		log.Fatalf("error reading config: %v", err)
 	}
 
-	handler, err := server.New(cfg)
+	store, err := ballot.Open(cfg.DBPath)
+	if err != nil {
+		log.Fatalf("error opening database: %v", err)
+	}
+	defer store.Close()
+
+	handler, err := server.New(cfg, store)
 	if err != nil {
 		log.Fatalf("error building server: %v", err)
 	}

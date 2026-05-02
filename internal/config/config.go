@@ -8,7 +8,8 @@ import (
 )
 
 type Config struct {
-	Port int
+	Port   int
+	DBPath string
 }
 
 func Load() (*Config, error) {
@@ -20,7 +21,9 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("PORT %d out of range", port)
 	}
 
-	return &Config{Port: port}, nil
+	dbPath := envWithDefault("DB_PATH", "./benefitshow.db")
+
+	return &Config{Port: port, DBPath: dbPath}, nil
 }
 
 func (c Config) ListenAddr() string {
@@ -38,4 +41,12 @@ func envInt(key string, fallback int) (int, error) {
 		return 0, fmt.Errorf("%s=%q is not a valid int: %w", key, val, err)
 	}
 	return n, nil
+}
+
+func envWithDefault(key, fallback string) string {
+	val := os.Getenv(key)
+	if val == "" {
+		return fallback
+	}
+	return val
 }

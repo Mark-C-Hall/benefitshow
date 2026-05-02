@@ -8,6 +8,25 @@
 </head>
 <body class="page-vote">
   <main>
+    {{if .Locked}}
+    <h1>Your vote is locked in</h1>
+    <p class="help">Thanks for voting! Here's your ranking.</p>
+    <ol class="locked-list">
+      {{range .Picks}}
+      <li class="song-row">
+        <span class="song-id">{{printf "%02d" .ID}}</span>
+        <div class="song-meta">
+          <div class="song-title">{{.Title}}</div>
+          <div class="song-artist">{{.Artist}}</div>
+        </div>
+        <span class="song-links">
+          <a href="{{.YouTubeURL}}" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube">▶</a>
+          <a href="{{.SpotifyURL}}" target="_blank" rel="noopener noreferrer" title="Spotify" aria-label="Spotify">♪</a>
+        </span>
+      </li>
+      {{end}}
+    </ol>
+    {{else}}
     <h1>Pick your top 5</h1>
     <p class="help">Tap a song to add it to your ranking. Reorder with the arrows. Submit when all 5 slots are filled.</p>
 
@@ -43,8 +62,9 @@
         </div>
       </section>
     </div>
+    {{end}}
   </main>
 
-  <script src="/static/vote.js"></script>
+  {{if not .Locked}}<script src="/static/vote.js"></script>{{end}}
 </body>
 </html>
