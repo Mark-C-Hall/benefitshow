@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Results - FP Malden BandVote</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="page-results">
+  <main>
+    <h1>Top 10</h1>
+    {{if .Results}}
+    <table class="results-table">
+      <thead>
+        <tr><th>Rank</th><th>Song</th><th>Artist</th></tr>
+      </thead>
+      <tbody>
+        {{range .Results}}
+        <tr>
+          <td class="rank">{{.Rank}}</td>
+          <td>{{.Title}}</td>
+          <td>{{.Artist}}</td>
+        </tr>
+        {{end}}
+      </tbody>
+    </table>
+    {{else}}
+    <p class="empty-note">No tally has been run yet.</p>
+    {{end}}
+  </main>
+</body>
+</html>

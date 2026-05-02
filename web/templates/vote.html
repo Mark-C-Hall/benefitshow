@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>vote — bandvote</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="page-vote">
+  <main>
+    <h1>Pick your top 5</h1>
+    <p class="help">Tap a song to add it to your ranking. Reorder with the arrows. Submit when all 5 slots are filled.</p>
+
+    <div class="vote-grid">
+      <section class="col">
+        <h2>Song pool</h2>
+        <ul id="song-pool" class="song-list">
+          {{range .Songs}}
+          <li class="song-row"
+              tabindex="0"
+              data-id="{{.ID}}"
+              data-title="{{.Title}}"
+              data-artist="{{.Artist}}">
+            <span class="song-id">{{printf "%02d" .ID}}</span>
+            <div class="song-meta">
+              <div class="song-title">{{.Title}}</div>
+              <div class="song-artist">{{.Artist}}</div>
+            </div>
+            <span class="song-links">
+              <a href="{{.YouTubeURL}}" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube">▶</a>
+              <a href="{{.SpotifyURL}}" target="_blank" rel="noopener noreferrer" title="Spotify" aria-label="Spotify">♪</a>
+            </span>
+          </li>
+          {{end}}
+        </ul>
+      </section>
+
+      <section class="col">
+        <h2>Your top 5</h2>
+        <ul id="slot-list" class="slot-list"></ul>
+        <div class="submit-row">
+          <button id="submit-btn" type="button" class="btn btn-primary" disabled>Submit ballot</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/static/vote.js"></script>
+</body>
+</html>
