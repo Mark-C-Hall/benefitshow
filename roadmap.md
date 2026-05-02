@@ -33,16 +33,16 @@ Goal: prove the deploy path works end-to-end before writing any real app code, s
 
 ## M1 — Static Web Surface
 
-- [ ] CLI subcommand dispatch in `main.go`: `serve`, `import`, `tally` (latter two are stubs)
-- [ ] `internal/songs`: hardcoded slice with `ID`, `Title`, `Artist`, `YouTubeURL`, `SpotifyURL`. Start with 5–10 entries; finalize the full list later
-- [ ] `internal/server`: `net/http` router, basic logging middleware
-- [ ] `go:embed` for `web/templates/*.html` and `web/static/*`
-- [ ] `GET /` renders `landing.html`
-- [ ] `GET /vote` renders `vote.html` with the song list (auth bypassed for now via a hardcoded user)
-- [ ] `GET /results` renders `results.html` with mock data
-- [ ] `web/static/style.css` — minimal styling, mobile-first
-- [ ] `web/static/vote.js` — click-to-rank UI, submit button (POSTs to a not-yet-real endpoint and logs the payload)
-- [ ] **Deploy:** `make deploy`. Walk the three pages on `bandvote.app` from a phone to verify mobile layout against real TLS and real network conditions.
+- [x] CLI subcommand dispatch in `main.go`: `serve`, `import`, `tally` (latter two are stubs)
+- [x] `internal/songs`: embedded JSON (`go:embed songs.json`) parsed into a `Song` slice with `ID`, `Title`, `Artist`, `YouTubeURL`, `SpotifyURL`. Start with 5–10 entries; finalize the full list later
+- [x] `internal/server`: `net/http` router, basic logging middleware
+- [x] `go:embed` for `web/templates/*.html` and `web/static/*`
+- [x] `GET /` renders `landing.html`
+- [x] `GET /vote` renders `vote.html` with the song list (auth bypassed for now via a hardcoded user)
+- [x] `GET /results` renders `results.html` with mock data
+- [x] `web/static/style.css` — minimal styling, mobile-first
+- [x] `web/static/vote.js` — click-to-rank UI, submit button (POSTs to a not-yet-real endpoint and logs the payload)
+- [x] **Deploy:** `make deploy`. Walk the three pages on `bandvote.app` from a phone to verify mobile layout against real TLS and real network conditions.
 
 **Done when:** the three pages render in production and the click-to-rank UI works on desktop and mobile.
 
