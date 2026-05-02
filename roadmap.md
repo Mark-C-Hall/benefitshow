@@ -48,12 +48,12 @@ Goal: prove the deploy path works end-to-end before writing any real app code, s
 
 ## M2 — Persistence
 
-- [ ] Add a SQLite driver (`modernc.org/sqlite` or chosen alternative) to `go.mod`
-- [ ] `internal/ballot`: schema migration on startup, `CreateBallot`, `HasVoted`
-- [ ] `POST /vote` validates payload (5 distinct song IDs from the pool), inserts a ballot, sets `users.has_voted = true`, all in one transaction
-- [ ] `GET /vote` for a user with `has_voted = true` renders the locked read-only view of their ranking
-- [ ] Confirm the SQLite file lands at `DB_PATH` (set in `/etc/benefitshow.env`) and survives a `systemctl restart`
-- [ ] **Deploy:** `make deploy`. With auth still stubbed, hit `POST /vote` from the prod box (`curl` over SSH) and confirm the row exists and the locked view renders.
+- [x] Add a SQLite driver (`modernc.org/sqlite` or chosen alternative) to `go.mod`
+- [x] `internal/ballot`: schema migration on startup, `CreateBallot`, `HasVoted`
+- [x] `POST /vote` validates payload (5 distinct song IDs from the pool), inserts a ballot, sets `users.has_voted = true`, all in one transaction
+- [x] `GET /vote` for a user with `has_voted = true` renders the locked read-only view of their ranking
+- [x] Confirm the SQLite file lands at `DB_PATH` (set in `/etc/benefitshow.env`) and survives a `systemctl restart`
+- [x] **Deploy:** `make deploy`. With auth still stubbed, hit `POST /vote` from the prod box (`curl` over SSH) and confirm the row exists and the locked view renders.
 
 **Done when:** prod can accept a ballot from a hardcoded user, persist it, and show the locked view on subsequent loads.
 
