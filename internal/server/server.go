@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/Mark-C-Hall/benefitshow/internal/auth"
 	"github.com/Mark-C-Hall/benefitshow/internal/ballot"
 	"github.com/Mark-C-Hall/benefitshow/internal/config"
 	"github.com/Mark-C-Hall/benefitshow/web"
@@ -20,7 +21,7 @@ type Server struct {
 	cfg       *config.Config
 	templates map[string]*template.Template
 	store     *ballot.Store
-	devUserID int64
+	auth      *auth.Client
 }
 
 func New(cfg *config.Config, store *ballot.Store) (http.Handler, error) {
@@ -29,17 +30,25 @@ func New(cfg *config.Config, store *ballot.Store) (http.Handler, error) {
 		return nil, fmt.Errorf("parsing templates: %w", err)
 	}
 
-	devUserID, err := store.EnsureUser("dev-stub", "dev")
-	if err != nil {
-		return nil, fmt.Errorf("bootstrapping dev user: %w", err)
+	s := &Server{
+		cfg:       cfg,
+		templates: templates,
+		store:     store,
+		auth: &auth.Client{
+			ClientID:     cfg.DiscordClientID,
+			ClientSecret: cfg.DiscordClientSecret,
+			RedirectURI:  cfg.DiscordRedirectURI,
+			GuildID:      cfg.DiscordGuildID,
+		},
 	}
-
-	s := &Server{cfg: cfg, templates: templates, store: store, devUserID: devUserID}
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.handleLanding)
-	mux.HandleFunc("GET /vote", s.handleVoteGet)
-	mux.HandleFunc("POST /vote", s.handleVotePost)
+	mux.HandleFunc("GET /auth/discord", s.handleAuthStart)
+	mux.HandleFunc("GET /auth/discord/callback", s.handleAuthCallback)
+	mux.Handle("GET /vote", s.requireAuth(http.HandlerFunc(s.handleVoteGet)))
+	mux.Handle("POST /vote", s.requireAuth(http.HandlerFunc(s.handleVotePost)))
+	mux.Handle("POST /logout", s.requireAuth(http.HandlerFunc(s.handleLogout)))
 	mux.HandleFunc("GET /results", s.handleResults)
 
 	staticFS, err := fs.Sub(web.Static, "static")

@@ -68,21 +68,46 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_ballots_user_online
 	return nil
 }
 
-// EnsureUser upserts a user row and returns the row id. Used by the dev-stub
-// bootstrap and (later) the real Discord OAuth callback.
-func (s *Store) EnsureUser(discordID, username string) (int64, error) {
-	_, err := s.db.Exec(
-		`INSERT OR IGNORE INTO users (discord_id, username) VALUES (?, ?)`,
-		discordID, username,
-	)
-	if err != nil {
-		return 0, fmt.Errorf("ballot: ensure user insert: %w", err)
-	}
+// LoginUser upserts the user (refreshing the username and rotating the
+// session token) and returns the row id. One transaction so a failed token
+// write doesn't leave a logged-out-but-existent user behind.
+func (s *Store) LoginUser(discordID, username, sessionToken string) (int64, error) {
 	var id int64
-	if err := s.db.QueryRow(`SELECT id FROM users WHERE discord_id = ?`, discordID).Scan(&id); err != nil {
-		return 0, fmt.Errorf("ballot: ensure user select: %w", err)
+	err := s.db.QueryRow(
+		`INSERT INTO users (discord_id, username, session_token)
+		 VALUES (?, ?, ?)
+		 ON CONFLICT(discord_id) DO UPDATE SET
+		   username = excluded.username,
+		   session_token = excluded.session_token
+		 RETURNING id`,
+		discordID, username, sessionToken,
+	).Scan(&id)
+	if err != nil {
+		return 0, fmt.Errorf("ballot: login user: %w", err)
 	}
 	return id, nil
+}
+
+// UserBySessionToken returns the user id for a session token, or (0, nil)
+// when no row matches. Returning a zero id rather than sql.ErrNoRows keeps
+// the auth middleware branch simple.
+func (s *Store) UserBySessionToken(token string) (int64, error) {
+	var id int64
+	err := s.db.QueryRow(`SELECT id FROM users WHERE session_token = ?`, token).Scan(&id)
+	if errors.Is(err, sql.ErrNoRows) {
+		return 0, nil
+	}
+	if err != nil {
+		return 0, fmt.Errorf("ballot: user by session: %w", err)
+	}
+	return id, nil
+}
+
+func (s *Store) ClearSessionToken(userID int64) error {
+	if _, err := s.db.Exec(`UPDATE users SET session_token = NULL WHERE id = ?`, userID); err != nil {
+		return fmt.Errorf("ballot: clear session: %w", err)
+	}
+	return nil
 }
 
 func (s *Store) HasVoted(userID int64) (bool, error) {

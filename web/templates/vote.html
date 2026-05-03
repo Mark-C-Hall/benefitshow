@@ -8,6 +8,9 @@
 </head>
 <body class="page-vote">
   <main>
+    <form method="POST" action="/logout" class="logout-form">
+      <button type="submit" class="link-btn">Log out</button>
+    </form>
     {{if .Locked}}
     <h1>Your vote is locked in</h1>
     <p class="help">Thanks for voting! Here's your ranking.</p>

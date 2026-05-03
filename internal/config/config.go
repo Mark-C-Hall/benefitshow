@@ -1,15 +1,23 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"net"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type Config struct {
-	Port   int
-	DBPath string
+	Port                int
+	DBPath              string
+	DiscordClientID     string
+	DiscordClientSecret string
+	DiscordGuildID      string
+	DiscordRedirectURI  string
+	SessionSecret       []byte
+	CookieSecure        bool // derived from DiscordRedirectURI scheme
 }
 
 func Load() (*Config, error) {
@@ -23,7 +31,29 @@ func Load() (*Config, error) {
 
 	dbPath := envWithDefault("DB_PATH", "./benefitshow.db")
 
-	return &Config{Port: port, DBPath: dbPath}, nil
+	discordClientID, e1 := envRequired("DISCORD_CLIENT_ID")
+	discordClientSecret, e2 := envRequired("DISCORD_CLIENT_SECRET")
+	discordGuildID, e3 := envRequired("DISCORD_GUILD_ID")
+	discordRedirectURI, e4 := envRequired("DISCORD_REDIRECT_URI")
+	sessionSecret, e5 := envRequired("SESSION_SECRET")
+	if e5 == nil && len(sessionSecret) < 32 {
+		e5 = fmt.Errorf("SESSION_SECRET must be at least 32 bytes (got %d)", len(sessionSecret))
+	}
+
+	if err := errors.Join(e1, e2, e3, e4, e5); err != nil {
+		return nil, err
+	}
+
+	return &Config{
+		Port:                port,
+		DBPath:              dbPath,
+		DiscordClientID:     discordClientID,
+		DiscordClientSecret: discordClientSecret,
+		DiscordGuildID:      discordGuildID,
+		DiscordRedirectURI:  discordRedirectURI,
+		SessionSecret:       []byte(sessionSecret),
+		CookieSecure:        strings.HasPrefix(discordRedirectURI, "https://"),
+	}, nil
 }
 
 func (c Config) ListenAddr() string {
@@ -49,4 +79,12 @@ func envWithDefault(key, fallback string) string {
 		return fallback
 	}
 	return val
+}
+
+func envRequired(key string) (string, error) {
+	val := os.Getenv(key)
+	if val == "" {
+		return "", fmt.Errorf("%s is required and not set", key)
+	}
+	return val, nil
 }

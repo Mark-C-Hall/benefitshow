@@ -33,14 +33,14 @@ type votePageData struct {
 }
 
 func (s *Server) handleVoteGet(w http.ResponseWriter, r *http.Request) {
-	voted, err := s.store.HasVoted(s.devUserID)
+	voted, err := s.store.HasVoted(userIDFrom(r))
 	if err != nil {
 		log.Printf("handleVoteGet: has voted: %v", err)
 		http.Error(w, "internal error", http.StatusInternalServerError)
 		return
 	}
 	if voted {
-		ranks, err := s.store.GetOnlineBallot(s.devUserID)
+		ranks, err := s.store.GetOnlineBallot(userIDFrom(r))
 		if err != nil {
 			log.Printf("handleVoteGet: get ballot: %v", err)
 			http.Error(w, "internal error", http.StatusInternalServerError)
@@ -88,7 +88,7 @@ func (s *Server) handleVotePost(w http.ResponseWriter, r *http.Request) {
 	var ranks [5]int
 	copy(ranks[:], p.Ranks)
 
-	if err := s.store.CreateOnlineBallot(s.devUserID, ranks); err != nil {
+	if err := s.store.CreateOnlineBallot(userIDFrom(r), ranks); err != nil {
 		if errors.Is(err, ballot.ErrAlreadyVoted) {
 			http.Error(w, "already voted", http.StatusConflict)
 			return

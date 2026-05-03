@@ -117,6 +117,10 @@
         window.location.href = '/vote';
         return;
       }
+      if (res.status === 401) {
+        window.location.href = '/';
+        return;
+      }
       const msg = await res.text();
       alert('Could not submit: ' + msg);
       window.location.href = '/vote';

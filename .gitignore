@@ -21,8 +21,8 @@ profile.cov
 go.work
 go.work.sum
 
-# env file
-.env
+# env files (local dev, prod staging, etc.)
+*.env
 
 # Built binaries
 /benefitshow

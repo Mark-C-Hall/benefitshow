@@ -14,7 +14,7 @@ build:
 	go build -o $(BINARY) $(PKG)
 
 run: build
-	./$(BINARY) serve
+	@set -a; [ -f .env ] && . ./.env; set +a; ./$(BINARY) serve
 
 lint:
 	go vet ./...
