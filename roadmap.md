@@ -61,16 +61,16 @@ Goal: prove the deploy path works end-to-end before writing any real app code, s
 
 This milestone needs a one-time Discord setup before the deploy step.
 
-- [ ] Register a Discord OAuth app for **local dev** (callback `http://localhost:8080/auth/discord/callback`)
-- [ ] Register a separate Discord OAuth app for **prod** (callback `https://bandvote.app/auth/discord/callback`)
-- [ ] `internal/auth`: build authorize URL with `state`, exchange code, fetch `/users/@me` and `/users/@me/guilds`
-- [ ] Verify `DISCORD_GUILD_ID` is in the user's guild list; reject otherwise
-- [ ] Upsert `users` row, mint session token, set HttpOnly Secure SameSite=Lax cookie
-- [ ] Auth middleware on `/vote` and `/logout`
-- [ ] `POST /logout` clears the session token and redirects to `/`
-- [ ] Replace the hardcoded dev user with the real session-derived user
-- [ ] Populate `/etc/benefitshow.env` on the VM with prod `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_GUILD_ID`, `DISCORD_REDIRECT_URI`, and a fresh `SESSION_SECRET`
-- [ ] **Deploy:** `make deploy && systemctl restart benefitshow`. Log in with a real Discord account that's in the guild; confirm `/vote` unlocks. Try with an account that's not in the guild; confirm rejection.
+- [x] Register a Discord OAuth app for **local dev** (callback `http://localhost:8080/auth/discord/callback`)
+- [x] Register a separate Discord OAuth app for **prod** (callback `https://bandvote.app/auth/discord/callback`)
+- [x] `internal/auth`: build authorize URL with `state`, exchange code, fetch `/users/@me` and `/users/@me/guilds`
+- [x] Verify `DISCORD_GUILD_ID` is in the user's guild list; reject otherwise
+- [x] Upsert `users` row, mint session token, set HttpOnly Secure SameSite=Lax cookie
+- [x] Auth middleware on `/vote` and `/logout`
+- [x] `POST /logout` clears the session token and redirects to `/`
+- [x] Replace the hardcoded dev user with the real session-derived user
+- [x] Populate `/etc/benefitshow.env` on the VM with prod `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `DISCORD_GUILD_ID`, `DISCORD_REDIRECT_URI`, and a fresh `SESSION_SECRET`
+- [x] **Deploy:** `make deploy && systemctl restart benefitshow`. Log in with a real Discord account that's in the guild; confirm `/vote` unlocks. Try with an account that's not in the guild; confirm rejection.
 
 **Done when:** real Discord login on prod authenticates a real guild member and unlocks `/vote`.
 
