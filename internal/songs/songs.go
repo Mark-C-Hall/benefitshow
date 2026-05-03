@@ -1,7 +1,4 @@
 // Package songs holds the static candidate pool for the election.
-//
-// The pool will grow to 30+ entries before launch; the current set is
-// placeholder data to develop against.
 package songs
 
 import (
