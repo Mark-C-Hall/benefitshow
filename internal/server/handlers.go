@@ -106,19 +106,6 @@ type resultRow struct {
 	Artist string
 }
 
-// mockResults returns a placeholder ranking so the /results template path is
-// exercised before M4 wires the real STV output.
-func mockResults() []resultRow {
-	out := make([]resultRow, 0, 10)
-	for i, s := range songs.All {
-		if i >= 10 {
-			break
-		}
-		out = append(out, resultRow{Rank: i + 1, Title: s.Title, Artist: s.Artist})
-	}
-	return out
-}
-
 func (s *Server) handleResults(w http.ResponseWriter, r *http.Request) {
-	s.render(w, "results.html", struct{ Results []resultRow }{Results: mockResults()})
+	s.render(w, "results.html", struct{ Results []resultRow }{})
 }
