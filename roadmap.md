@@ -76,12 +76,12 @@ This milestone needs a one-time Discord setup before the deploy step.
 
 ## M4 — Tally and Results
 
-- [ ] `benefitshow import <csv>`: parse 5-column rows, insert as `paper` ballots
-- [ ] `internal/stv`: implement Droop quota STV. Inputs: ballots and `N`. Output: ordered list of song IDs
-- [ ] `benefitshow tally`: run STV across all ballots, print top 10, persist the ordering for the results page
-- [ ] `GET /results` reads the persisted ordering and renders the table; empty state if no tally has been run yet
-- [ ] Hand-verified test: a small fixture CSV that exercises election, surplus transfer, and elimination
-- [ ] **Deploy:** `make deploy`. SSH in, run `./benefitshow import` with the fixture CSV against a scratch DB, then `./benefitshow tally`, and confirm `/results` renders. Reset the DB before opening the polls for real.
+- [x] `benefitshow import <csv>`: parse 5-column rows, insert as `paper` ballots
+- [x] `internal/stv`: implement Droop quota STV. Inputs: ballots and `N`. Output: ordered list of song IDs
+- [x] `benefitshow tally`: run STV across all ballots, print top 10, persist the ordering for the results page
+- [x] `GET /results` reads the persisted ordering and renders the table; empty state if no tally has been run yet
+- [x] Hand-verified test: a small fixture CSV that exercises election, surplus transfer, and elimination
+- [x] **Deploy:** `make deploy`. SSH in, run `./benefitshow import` with the fixture CSV against a scratch DB, then `./benefitshow tally`, and confirm `/results` renders. Reset the DB before opening the polls for real.
 
 **Done when:** on prod, `import` followed by `tally` produces a stable ranked top 10 visible at `/results`.
 
