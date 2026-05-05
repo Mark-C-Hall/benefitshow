@@ -107,5 +107,22 @@ type resultRow struct {
 }
 
 func (s *Server) handleResults(w http.ResponseWriter, r *http.Request) {
-	s.render(w, "results.html", struct{ Results []resultRow }{})
+	ordering, err := s.store.GetTallyResults()
+	if err != nil {
+		log.Printf("handleResults: get tally: %v", err)
+		http.Error(w, "internal error", http.StatusInternalServerError)
+		return
+	}
+	rows := make([]resultRow, 0, 10)
+	for i, id := range ordering {
+		if i >= 10 {
+			break
+		}
+		song := songs.ByID(id)
+		if song == nil {
+			continue
+		}
+		rows = append(rows, resultRow{Rank: i + 1, Title: song.Title, Artist: song.Artist})
+	}
+	s.render(w, "results.html", struct{ Results []resultRow }{Results: rows})
 }

@@ -8,13 +8,20 @@ REMOTE_DIR  := /opt/benefitshow
 
 GCLOUD_FLAGS := --zone=$(GCP_ZONE) --project=$(GCP_PROJECT)
 
-.PHONY: build run lint clean build-linux deploy reset-db
+.PHONY: build run import tally lint clean build-linux deploy reset-db
 
 build:
 	go build -o $(BINARY) $(PKG)
 
 run: build
 	@set -a; [ -f .env ] && . ./.env; set +a; ./$(BINARY) serve
+
+import: build
+	@if [ -z "$(CSV)" ]; then echo "usage: make import CSV=path/to/ballots.csv" >&2; exit 2; fi
+	@set -a; [ -f .env ] && . ./.env; set +a; ./$(BINARY) import $(CSV)
+
+tally: build
+	@set -a; [ -f .env ] && . ./.env; set +a; ./$(BINARY) tally
 
 lint:
 	go vet ./...

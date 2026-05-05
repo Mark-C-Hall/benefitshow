@@ -61,6 +61,11 @@ CREATE TABLE IF NOT EXISTS ballots (
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_ballots_user_online
   ON ballots(user_id) WHERE source = 'online' AND user_id IS NOT NULL;
+
+CREATE TABLE IF NOT EXISTS tally_results (
+  rank    INTEGER PRIMARY KEY,
+  song_id INTEGER NOT NULL
+);
 `)
 	if err != nil {
 		return fmt.Errorf("ballot: init schema: %w", err)
@@ -164,4 +169,100 @@ func (s *Store) CreateOnlineBallot(userID int64, ranks [5]int) error {
 	}
 
 	return tx.Commit()
+}
+
+// ImportPaperBallots inserts every row as a paper ballot in a single
+// transaction, so a partial CSV doesn't leave half a load behind.
+func (s *Store) ImportPaperBallots(rows [][5]int) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return fmt.Errorf("ballot: begin tx: %w", err)
+	}
+	defer tx.Rollback() //nolint:errcheck
+
+	stmt, err := tx.Prepare(
+		`INSERT INTO ballots (user_id, source, rank_1, rank_2, rank_3, rank_4, rank_5)
+		 VALUES (NULL, 'paper', ?, ?, ?, ?, ?)`,
+	)
+	if err != nil {
+		return fmt.Errorf("ballot: prepare paper insert: %w", err)
+	}
+	defer stmt.Close()
+
+	for i, r := range rows {
+		if _, err := stmt.Exec(r[0], r[1], r[2], r[3], r[4]); err != nil {
+			return fmt.Errorf("ballot: insert paper row %d: %w", i+1, err)
+		}
+	}
+	return tx.Commit()
+}
+
+// GetAllBallots returns every ballot's five ranked song IDs, online and paper.
+func (s *Store) GetAllBallots() ([][5]int, error) {
+	rows, err := s.db.Query(`SELECT rank_1, rank_2, rank_3, rank_4, rank_5 FROM ballots`)
+	if err != nil {
+		return nil, fmt.Errorf("ballot: get all ballots: %w", err)
+	}
+	defer rows.Close()
+
+	var out [][5]int
+	for rows.Next() {
+		var r [5]int
+		if err := rows.Scan(&r[0], &r[1], &r[2], &r[3], &r[4]); err != nil {
+			return nil, fmt.Errorf("ballot: scan ballot: %w", err)
+		}
+		out = append(out, r)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("ballot: iterate ballots: %w", err)
+	}
+	return out, nil
+}
+
+// SaveTallyResults wipes prior results and writes the new ordering, 1-indexed.
+func (s *Store) SaveTallyResults(songIDs []int) error {
+	tx, err := s.db.Begin()
+	if err != nil {
+		return fmt.Errorf("ballot: begin tx: %w", err)
+	}
+	defer tx.Rollback() //nolint:errcheck
+
+	if _, err := tx.Exec(`DELETE FROM tally_results`); err != nil {
+		return fmt.Errorf("ballot: clear tally: %w", err)
+	}
+	stmt, err := tx.Prepare(`INSERT INTO tally_results (rank, song_id) VALUES (?, ?)`)
+	if err != nil {
+		return fmt.Errorf("ballot: prepare tally insert: %w", err)
+	}
+	defer stmt.Close()
+
+	for i, id := range songIDs {
+		if _, err := stmt.Exec(i+1, id); err != nil {
+			return fmt.Errorf("ballot: insert tally rank %d: %w", i+1, err)
+		}
+	}
+	return tx.Commit()
+}
+
+// GetTallyResults returns the persisted ordering, or an empty slice if no
+// tally has been run.
+func (s *Store) GetTallyResults() ([]int, error) {
+	rows, err := s.db.Query(`SELECT song_id FROM tally_results ORDER BY rank`)
+	if err != nil {
+		return nil, fmt.Errorf("ballot: get tally: %w", err)
+	}
+	defer rows.Close()
+
+	var out []int
+	for rows.Next() {
+		var id int
+		if err := rows.Scan(&id); err != nil {
+			return nil, fmt.Errorf("ballot: scan tally: %w", err)
+		}
+		out = append(out, id)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("ballot: iterate tally: %w", err)
+	}
+	return out, nil
 }
