@@ -6,7 +6,7 @@ Built as a single Go binary serving its own templates and static assets — no J
 
 ## Status
 
-Pre-alpha. Active build target: weekend of 2026-05-03. See [roadmap.md](roadmap.md) for milestones.
+Build complete (M0–M4). Awaiting the voting window to open; see [roadmap.md](roadmap.md) for the launch / post-launch checklist.
 
 ## Stack
 
