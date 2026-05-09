@@ -56,7 +56,12 @@ CREATE TABLE IF NOT EXISTS ballots (
   rank_2  INTEGER NOT NULL,
   rank_3  INTEGER NOT NULL,
   rank_4  INTEGER NOT NULL,
-  rank_5  INTEGER NOT NULL
+  rank_5  INTEGER NOT NULL,
+  rank_6  INTEGER NOT NULL,
+  rank_7  INTEGER NOT NULL,
+  rank_8  INTEGER NOT NULL,
+  rank_9  INTEGER NOT NULL,
+  rank_10 INTEGER NOT NULL
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS idx_ballots_user_online
@@ -124,14 +129,16 @@ func (s *Store) HasVoted(userID int64) (bool, error) {
 	return v == 1, nil
 }
 
-// GetOnlineBallot returns the five ranked song IDs for the user's online ballot.
-func (s *Store) GetOnlineBallot(userID int64) ([5]int, error) {
-	var ranks [5]int
+// GetOnlineBallot returns the ten ranked song IDs for the user's online ballot.
+func (s *Store) GetOnlineBallot(userID int64) ([10]int, error) {
+	var ranks [10]int
 	err := s.db.QueryRow(
-		`SELECT rank_1, rank_2, rank_3, rank_4, rank_5
+		`SELECT rank_1, rank_2, rank_3, rank_4, rank_5,
+		        rank_6, rank_7, rank_8, rank_9, rank_10
 		   FROM ballots WHERE user_id = ? AND source = 'online'`,
 		userID,
-	).Scan(&ranks[0], &ranks[1], &ranks[2], &ranks[3], &ranks[4])
+	).Scan(&ranks[0], &ranks[1], &ranks[2], &ranks[3], &ranks[4],
+		&ranks[5], &ranks[6], &ranks[7], &ranks[8], &ranks[9])
 	if err != nil {
 		return ranks, fmt.Errorf("ballot: get online ballot: %w", err)
 	}
@@ -140,7 +147,7 @@ func (s *Store) GetOnlineBallot(userID int64) ([5]int, error) {
 
 // CreateOnlineBallot inserts an online ballot inside a transaction. Returns
 // ErrAlreadyVoted if the user has already submitted.
-func (s *Store) CreateOnlineBallot(userID int64, ranks [5]int) error {
+func (s *Store) CreateOnlineBallot(userID int64, ranks [10]int) error {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return fmt.Errorf("ballot: begin tx: %w", err)
@@ -156,9 +163,11 @@ func (s *Store) CreateOnlineBallot(userID int64, ranks [5]int) error {
 	}
 
 	_, err = tx.Exec(
-		`INSERT INTO ballots (user_id, source, rank_1, rank_2, rank_3, rank_4, rank_5)
-		 VALUES (?, 'online', ?, ?, ?, ?, ?)`,
+		`INSERT INTO ballots (user_id, source, rank_1, rank_2, rank_3, rank_4, rank_5,
+		                                       rank_6, rank_7, rank_8, rank_9, rank_10)
+		 VALUES (?, 'online', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 		userID, ranks[0], ranks[1], ranks[2], ranks[3], ranks[4],
+		ranks[5], ranks[6], ranks[7], ranks[8], ranks[9],
 	)
 	if err != nil {
 		return fmt.Errorf("ballot: insert ballot: %w", err)
@@ -173,7 +182,7 @@ func (s *Store) CreateOnlineBallot(userID int64, ranks [5]int) error {
 
 // ImportPaperBallots inserts every row as a paper ballot in a single
 // transaction, so a partial CSV doesn't leave half a load behind.
-func (s *Store) ImportPaperBallots(rows [][5]int) error {
+func (s *Store) ImportPaperBallots(rows [][10]int) error {
 	tx, err := s.db.Begin()
 	if err != nil {
 		return fmt.Errorf("ballot: begin tx: %w", err)
@@ -181,8 +190,9 @@ func (s *Store) ImportPaperBallots(rows [][5]int) error {
 	defer tx.Rollback() //nolint:errcheck
 
 	stmt, err := tx.Prepare(
-		`INSERT INTO ballots (user_id, source, rank_1, rank_2, rank_3, rank_4, rank_5)
-		 VALUES (NULL, 'paper', ?, ?, ?, ?, ?)`,
+		`INSERT INTO ballots (user_id, source, rank_1, rank_2, rank_3, rank_4, rank_5,
+		                                       rank_6, rank_7, rank_8, rank_9, rank_10)
+		 VALUES (NULL, 'paper', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
 	)
 	if err != nil {
 		return fmt.Errorf("ballot: prepare paper insert: %w", err)
@@ -190,25 +200,27 @@ func (s *Store) ImportPaperBallots(rows [][5]int) error {
 	defer stmt.Close()
 
 	for i, r := range rows {
-		if _, err := stmt.Exec(r[0], r[1], r[2], r[3], r[4]); err != nil {
+		if _, err := stmt.Exec(r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9]); err != nil {
 			return fmt.Errorf("ballot: insert paper row %d: %w", i+1, err)
 		}
 	}
 	return tx.Commit()
 }
 
-// GetAllBallots returns every ballot's five ranked song IDs, online and paper.
-func (s *Store) GetAllBallots() ([][5]int, error) {
-	rows, err := s.db.Query(`SELECT rank_1, rank_2, rank_3, rank_4, rank_5 FROM ballots`)
+// GetAllBallots returns every ballot's ten ranked song IDs, online and paper.
+func (s *Store) GetAllBallots() ([][10]int, error) {
+	rows, err := s.db.Query(
+		`SELECT rank_1, rank_2, rank_3, rank_4, rank_5,
+		        rank_6, rank_7, rank_8, rank_9, rank_10 FROM ballots`)
 	if err != nil {
 		return nil, fmt.Errorf("ballot: get all ballots: %w", err)
 	}
 	defer rows.Close()
 
-	var out [][5]int
+	var out [][10]int
 	for rows.Next() {
-		var r [5]int
-		if err := rows.Scan(&r[0], &r[1], &r[2], &r[3], &r[4]); err != nil {
+		var r [10]int
+		if err := rows.Scan(&r[0], &r[1], &r[2], &r[3], &r[4], &r[5], &r[6], &r[7], &r[8], &r[9]); err != nil {
 			return nil, fmt.Errorf("ballot: scan ballot: %w", err)
 		}
 		out = append(out, r)

@@ -24,15 +24,15 @@
           <div class="song-artist">{{.Artist}}</div>
         </div>
         <span class="song-links">
-          <a href="{{.YouTubeURL}}" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube">▶</a>
-          <a href="{{.SpotifyURL}}" target="_blank" rel="noopener noreferrer" title="Spotify" aria-label="Spotify">♪</a>
+          {{if .YouTubeURL}}<a href="{{.YouTubeURL}}" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube">▶</a>{{end}}
+          {{if .SpotifyURL}}<a href="{{.SpotifyURL}}" target="_blank" rel="noopener noreferrer" title="Spotify" aria-label="Spotify">♪</a>{{end}}
         </span>
       </li>
       {{end}}
     </ol>
     {{else}}
-    <h1>Pick your top 5</h1>
-    <p class="help">Tap a song to add it to your ranking. Reorder with the arrows. Submit when all 5 slots are filled.</p>
+    <h1>Pick your top 10</h1>
+    <p class="help">Tap a song to add it to your ranking. Reorder with the arrows. Submit when all 10 slots are filled.</p>
 
     <div class="vote-grid">
       <section class="col">
@@ -50,8 +50,8 @@
               <div class="song-artist">{{.Artist}}</div>
             </div>
             <span class="song-links">
-              <a href="{{.YouTubeURL}}" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube">▶</a>
-              <a href="{{.SpotifyURL}}" target="_blank" rel="noopener noreferrer" title="Spotify" aria-label="Spotify">♪</a>
+              {{if .YouTubeURL}}<a href="{{.YouTubeURL}}" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube">▶</a>{{end}}
+              {{if .SpotifyURL}}<a href="{{.SpotifyURL}}" target="_blank" rel="noopener noreferrer" title="Spotify" aria-label="Spotify">♪</a>{{end}}
             </span>
           </li>
           {{end}}
@@ -59,7 +59,7 @@
       </section>
 
       <section class="col">
-        <h2>Your top 5</h2>
+        <h2>Your top 10</h2>
         <ul id="slot-list" class="slot-list"></ul>
         <div class="submit-row">
           <button id="submit-btn" type="button" class="btn btn-primary" disabled>Submit ballot</button>

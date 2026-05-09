@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-benefitshow is a ranked-choice voting tool for selecting a small setlist (5 songs played, with a ranked top 10 produced for flexibility) from a fixed pool of ~30 candidate songs. The voting population is a single online community (Discord guild) of roughly 50–100 people, with a hybrid online + paper voting workflow.
+benefitshow is a ranked-choice voting tool for selecting a small setlist (a ranked top 10 is produced) from a fixed pool of candidate songs. The voting population is a single online community (Discord guild) of roughly 50–100 people, with a hybrid online + paper voting workflow.
 
 The app is intentionally narrow: one election, one fixed song pool, one administrator. There is no admin UI, no multi-tenancy, and no support for multiple concurrent elections.
 
@@ -26,12 +26,12 @@ The app is intentionally narrow: one election, one fixed song pool, one administ
 
 ## 3. Voting Workflow
 
-1. The administrator publishes a song list (paper handouts and an online page) with stable IDs (`01`–`30+`). The same IDs appear on paper ballots and in the app.
+1. The administrator publishes a song list (paper handouts and an online page) with stable IDs. The same IDs appear on paper ballots and in the app.
 2. Voters either:
-   - Log in to the app with Discord, rank 5 songs, and submit; or
+   - Log in to the app with Discord, rank 10 songs, and submit; or
    - Fill out a paper ballot in person.
 3. The online voting window runs ~10 days, spanning two weekly gatherings to maximize paper-ballot coverage.
-4. At close, the administrator transcribes paper ballots into a CSV (one row per ballot, 5 columns of song IDs in rank order) and imports them via `benefitshow import`.
+4. At close, the administrator transcribes paper ballots into a CSV (one row per ballot, 10 columns of song IDs in rank order) and imports them via `benefitshow import`.
 5. The administrator runs `benefitshow tally`. The STV algorithm produces a ranked top 10, written to the `/results` page and printed to stdout.
 6. The top picks are passed to the band offline. Any songs that cannot be performed are skipped and the next-ranked song moves up. This veto/backfill step happens outside the app.
 
@@ -54,7 +54,7 @@ Caddy terminates TLS and reverse-proxies to the Go binary. The binary serves all
 
 ## 5. Data Model
 
-Songs are not stored in the database; they live in a hardcoded Go slice in `internal/songs`. Their IDs match the paper-ballot IDs (`01`–`30+`).
+Songs are not stored in the database; they live in an embedded JSON file under `internal/songs`. Their IDs match the paper-ballot IDs.
 
 ### `users`
 
@@ -78,6 +78,11 @@ Songs are not stored in the database; they live in a hardcoded Go slice in `inte
 | `rank_3`   | INTEGER | Song ID, not null                              |
 | `rank_4`   | INTEGER | Song ID, not null                              |
 | `rank_5`   | INTEGER | Song ID, not null                              |
+| `rank_6`   | INTEGER | Song ID, not null                              |
+| `rank_7`   | INTEGER | Song ID, not null                              |
+| `rank_8`   | INTEGER | Song ID, not null                              |
+| `rank_9`   | INTEGER | Song ID, not null                              |
+| `rank_10`  | INTEGER | Song ID, not null                              |
 
 Ballots are immutable once written. The `users.has_voted` flag is set in the same transaction as the online ballot insert.
 
@@ -127,7 +132,7 @@ User                  App                            Discord
 Three templates rendered server-side via `html/template`:
 
 - `landing.html` — title and "Login with Discord" button.
-- `vote.html` — two columns (song pool on the left, "Your Top 5" slots on the right), submit button. After submission, the page renders a read-only "your vote is locked in" view showing the user's ranking.
+- `vote.html` — two columns (song pool on the left, "Your Top 10" slots on the right), submit button. After submission, the page renders a read-only "your vote is locked in" view showing the user's ranking.
 - `results.html` — ranked table of the top 10 once the tally has been run.
 
 Templates are parsed once at startup and reused for every request.
@@ -141,8 +146,8 @@ Interaction model is **click-to-select**, not HTML5 drag-and-drop (drag-and-drop
 - Click a song in the left column → it moves to the next open slot on the right.
 - Click a song in the right column → it returns to the left pool.
 - Up/down arrows on each right-column entry to reorder.
-- Submit is disabled until exactly 5 songs are selected.
-- On submit, POST `application/json` to `/vote` with `{"ranks": [<id>, <id>, <id>, <id>, <id>]}`. On success the server returns `204 No Content` and the client navigates to `/vote`, which renders the locked view. On `409 Conflict` (already voted) the client also navigates to `/vote` to surface the locked view; other 4xx responses are shown to the user as an error.
+- Submit is disabled until exactly 10 songs are selected.
+- On submit, POST `application/json` to `/vote` with `{"ranks": [<id>, <id>, ..., <id>]}` (10 IDs). On success the server returns `204 No Content` and the client navigates to `/vote`, which renders the locked view. On `409 Conflict` (already voted) the client also navigates to `/vote` to surface the locked view; other 4xx responses are shown to the user as an error.
 
 Each song row renders its ID, title, artist, and small icon links to its YouTube and Spotify pages. URLs are part of the hardcoded song data.
 
@@ -154,7 +159,7 @@ benefitshow import <path.csv>  # import paper ballots from a CSV file
 benefitshow tally              # run the STV algorithm, print and persist results
 ```
 
-CSV format: header optional, 5 integer columns per row, no `user_id` or `source` columns. The importer inserts each row as a `paper` ballot with `user_id = NULL`.
+CSV format: header optional, 10 integer columns per row, no `user_id` or `source` columns. The importer inserts each row as a `paper` ballot with `user_id = NULL`.
 
 ## 10. Tally: STV with the Droop Quota
 

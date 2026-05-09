@@ -46,7 +46,7 @@ func (s *Server) handleVoteGet(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "internal error", http.StatusInternalServerError)
 			return
 		}
-		picks := make([]songs.Song, 5)
+		picks := make([]songs.Song, 10)
 		for i, id := range ranks {
 			if song := songs.ByID(id); song != nil {
 				picks[i] = *song
@@ -68,11 +68,11 @@ func (s *Server) handleVotePost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "invalid JSON", http.StatusBadRequest)
 		return
 	}
-	if len(p.Ranks) != 5 {
-		http.Error(w, "exactly 5 songs required", http.StatusBadRequest)
+	if len(p.Ranks) != 10 {
+		http.Error(w, "exactly 10 songs required", http.StatusBadRequest)
 		return
 	}
-	seen := make(map[int]bool, 5)
+	seen := make(map[int]bool, 10)
 	for _, id := range p.Ranks {
 		if songs.ByID(id) == nil {
 			http.Error(w, "invalid song id", http.StatusBadRequest)
@@ -85,7 +85,7 @@ func (s *Server) handleVotePost(w http.ResponseWriter, r *http.Request) {
 		seen[id] = true
 	}
 
-	var ranks [5]int
+	var ranks [10]int
 	copy(ranks[:], p.Ranks)
 
 	if err := s.store.CreateOnlineBallot(userIDFrom(r), ranks); err != nil {

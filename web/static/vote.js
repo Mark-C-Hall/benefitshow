@@ -1,5 +1,5 @@
 (() => {
-  const SLOT_COUNT = 5;
+  const SLOT_COUNT = 10;
   const pool = document.getElementById('song-pool');
   const slotList = document.getElementById('slot-list');
   const submitBtn = document.getElementById('submit-btn');

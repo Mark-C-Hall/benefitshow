@@ -1,6 +1,6 @@
 # benefitshow
 
-A small ranked-choice voting app for picking a 5-song setlist from a pool of ~30 candidates. Voters log in with Discord (gated by membership in a configured guild) and rank their top 5 picks. After voting closes, paper ballots are imported via CSV and a Single Transferable Vote (STV) tally produces a ranked top 10.
+A small ranked-choice voting app for picking a setlist from a pool of candidate songs. Voters log in with Discord (gated by membership in a configured guild) and rank their top 10 picks. After voting closes, paper ballots are imported via CSV and a Single Transferable Vote (STV) tally produces a ranked top 10.
 
 Built as a single Go binary serving its own templates and static assets — no JavaScript framework, no separate frontend.
 

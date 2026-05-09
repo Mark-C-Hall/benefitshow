@@ -22,7 +22,7 @@ const seats = 10
 const usage = `usage: benefitshow {serve|import|tally}
 
   serve            run the web server
-  import <path>    import paper ballots from a 5-column CSV
+  import <path>    import paper ballots from a 10-column CSV
   tally            run the STV tally and persist the top ` + "10"
 
 func main() {
@@ -98,7 +98,7 @@ func runImport(path string) {
 	fmt.Printf("imported %d paper ballot(s) from %s\n", len(rows), path)
 }
 
-func readBallotCSV(path string) ([][5]int, error) {
+func readBallotCSV(path string) ([][10]int, error) {
 	f, err := os.Open(path)
 	if err != nil {
 		return nil, fmt.Errorf("open %s: %w", path, err)
@@ -106,9 +106,9 @@ func readBallotCSV(path string) ([][5]int, error) {
 	defer f.Close()
 
 	reader := csv.NewReader(f)
-	reader.FieldsPerRecord = 5
+	reader.FieldsPerRecord = 10
 
-	var rows [][5]int
+	var rows [][10]int
 	lineNum := 0
 	for {
 		rec, err := reader.Read()
@@ -133,9 +133,9 @@ func readBallotCSV(path string) ([][5]int, error) {
 	return rows, nil
 }
 
-func parseBallotRow(rec []string) ([5]int, error) {
-	var row [5]int
-	seen := make(map[int]bool, 5)
+func parseBallotRow(rec []string) ([10]int, error) {
+	var row [10]int
+	seen := make(map[int]bool, 10)
 	for i, field := range rec {
 		id, err := strconv.Atoi(field)
 		if err != nil {

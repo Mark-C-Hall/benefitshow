@@ -34,7 +34,7 @@ Goal: prove the deploy path works end-to-end before writing any real app code, s
 ## M1 — Static Web Surface
 
 - [x] CLI subcommand dispatch in `main.go`: `serve`, `import`, `tally` (latter two are stubs)
-- [x] `internal/songs`: embedded JSON (`go:embed songs.json`) parsed into a `Song` slice with `ID`, `Title`, `Artist`, `YouTubeURL`, `SpotifyURL`. Start with 5–10 entries; finalize the full list later
+- [x] `internal/songs`: embedded JSON (`go:embed songs.json`) parsed into a `Song` slice with `ID`, `Title`, `Artist`, `YouTubeURL`, `SpotifyURL`.
 - [x] `internal/server`: `net/http` router, basic logging middleware
 - [x] `go:embed` for `web/templates/*.html` and `web/static/*`
 - [x] `GET /` renders `landing.html`
@@ -50,7 +50,7 @@ Goal: prove the deploy path works end-to-end before writing any real app code, s
 
 - [x] Add a SQLite driver (`modernc.org/sqlite` or chosen alternative) to `go.mod`
 - [x] `internal/ballot`: schema migration on startup, `CreateBallot`, `HasVoted`
-- [x] `POST /vote` validates payload (5 distinct song IDs from the pool), inserts a ballot, sets `users.has_voted = true`, all in one transaction
+- [x] `POST /vote` validates payload (10 distinct song IDs from the pool), inserts a ballot, sets `users.has_voted = true`, all in one transaction
 - [x] `GET /vote` for a user with `has_voted = true` renders the locked read-only view of their ranking
 - [x] Confirm the SQLite file lands at `DB_PATH` (set in `/etc/benefitshow.env`) and survives a `systemctl restart`
 - [x] **Deploy:** `make deploy`. With auth still stubbed, hit `POST /vote` from the prod box (`curl` over SSH) and confirm the row exists and the locked view renders.
@@ -76,7 +76,7 @@ This milestone needs a one-time Discord setup before the deploy step.
 
 ## M4 — Tally and Results
 
-- [x] `benefitshow import <csv>`: parse 5-column rows, insert as `paper` ballots
+- [x] `benefitshow import <csv>`: parse 10-column rows, insert as `paper` ballots
 - [x] `internal/stv`: implement Droop quota STV. Inputs: ballots and `N`. Output: ordered list of song IDs
 - [x] `benefitshow tally`: run STV across all ballots, print top 10, persist the ordering for the results page
 - [x] `GET /results` reads the persisted ordering and renders the table; empty state if no tally has been run yet
@@ -87,8 +87,8 @@ This milestone needs a one-time Discord setup before the deploy step.
 
 ## Launch and Post-launch
 
-- [ ] Final song list locked in `internal/songs`; ship it via `make deploy`
-- [ ] Wipe any test ballots from the prod DB; confirm `users` and `ballots` are empty
-- [ ] Open the voting window; share the URL
+- [x] Final song list locked in `internal/songs`; ship it via `make deploy`
+- [x] Wipe any test ballots from the prod DB; confirm `users` and `ballots` are empty
+- [x] Open the voting window; share the URL
 - [ ] After close: transcribe paper ballots into CSV, `import`, `tally`, share `/results`
 - [ ] Wipe the DB or archive the binary + DB after the show

@@ -6,7 +6,7 @@ package stv
 import "sort"
 
 // Run computes the STV ordering for the given ballots and seat count.
-// Each ballot is exactly five ranked song IDs.
+// Each ballot is exactly ten ranked song IDs.
 //
 // Returns song IDs in election order, then eliminated candidates in reverse
 // elimination order, so the result page can show a full ranking. The output
@@ -15,7 +15,7 @@ import "sort"
 //
 // Ties at election or elimination time are broken by lower song ID first
 // (spec §10: "ascending").
-func Run(ballots [][5]int, seats int) []int {
+func Run(ballots [][10]int, seats int) []int {
 	state := make([]ballotState, len(ballots))
 	candidates := map[int]bool{}
 	for i, b := range ballots {
@@ -125,7 +125,7 @@ func sortByVotes(ids []int, totals map[int]float64, highFirst bool) {
 }
 
 type ballotState struct {
-	ranks  [5]int
+	ranks  [10]int
 	weight float64
 	cursor int
 }
